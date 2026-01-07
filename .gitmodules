@@ -1,0 +1,3 @@
+[submodule "massblaster_plutof_pub"]
+	path = massblaster_plutof_pub
+	url = https://github.com/TU-NHM/massblaster_plutof_pub.git
