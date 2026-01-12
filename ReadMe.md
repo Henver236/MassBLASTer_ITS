@@ -110,7 +110,7 @@ Base de données contre laquelle on aligne les séquences :
 Ici → `plutof_fungi_its`
 
 Mais il y a d'autre option :
-
+```bash
 plutof_fungi_its:     "UNITE (only fungi); rDNA ITS"
 plutof_nf_its:        "UNITE (non-fungi) / Other_euk_1; rDNA ITS"
 insd_its:             "INSD (only fungi); rDNA ITS"
@@ -128,7 +128,7 @@ plutof8:             "UNITE+INSD+Other_euk"
 plutof9:             "INSD+Envir+Other_euk"
 plutof10:            "UNITE+Envir+Other_euk"
 plutof11:            "UNITE+INSD+Envir+Other_euk"
-
+```
 Remlacer la dernière partie du chemin par l'option choisie.
 
 ---
