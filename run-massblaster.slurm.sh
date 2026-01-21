@@ -6,7 +6,7 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=16G
 #SBATCH --time=02:00:00
-#SBATCH --chdir=/cluster/raid/home/f80878358/MassBLASTer
+
 
 #set -euxo pipefail
 set -exo pipefail
@@ -40,12 +40,15 @@ CLEAN_NAME=${SOURCE_FILENAME#source_}
 echo "Source file : $SOURCE_FILE"
 echo "Cleaned name : $CLEAN_NAME"
 
+# création du dossier de sortie :
+mkdir -p "output"
+
 cd "$BASE_DIR/massblaster_plutof_pub"
 
 apptainer exec massblaster.sif /run_massblaster.sh "$CLEAN_NAME" \
     -num_threads 8 \
     -dust no \
-    -db "/massblaster_plutof_rel/data/plutof1" \
+    -db "/massblaster_plutof_rel/data/ITS_RefSeq_Fungi" \
     -outfmt 15 \
     -reward 1 \
     -gapextend 2 \
@@ -57,6 +60,6 @@ apptainer exec massblaster.sif /run_massblaster.sh "$CLEAN_NAME" \
 python "$BASE_DIR/format-output.py"
 
 # Cleaning folders...
-rm -rf outdata/* userdir/*
+#rm -rf outdata/* userdir/*
 
 echo "\e[32m ✔ MassBLASTer pipeline completed ! \e[0m"

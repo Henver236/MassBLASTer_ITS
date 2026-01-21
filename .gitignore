@@ -1,5 +1,8 @@
-slurm-logs/
-output/
+slurm-logs/*
+output/*
+db/*
+data/*
+massblaster_plutof_pub/*
 
 launch-massblaster.slurm.sh
 WID-unite-massblaster.sh
@@ -8,5 +11,7 @@ ssh-git.pub
 ssh-github
 ssh-github.pub
 
-
+update-NCBI-ITS-db_short.sh
 trim_fasta.sh
+
+WID-MassBLASTer_ITS.sh
