@@ -12,18 +12,22 @@ from datetime import datetime
 #  PARAMÈTRES
 # ──────────────────────────────────────────────
 
+# Obtenir le répertoire où le script Python est situé
+BASE_DIR = Path(__file__).parent  # Cela renverra le répertoire du script Python
+
 # Input : où se trouvent le fichier JSON créé par blastn
-INPUT_DIR = Path.home() / "MassBLASTer/massblaster_plutof_pub/outdata"
+INPUT_DIR = BASE_DIR / "massblaster_plutof_pub/outdata"
 # Output : dossier où sont créer le CSV et HTML
-OUTPUT_BASE = Path.home() / "MassBLASTer/output" # Alternative : Path("output") pour relatif au pwd
+OUTPUT_BASE = BASE_DIR / "output" # Alternative : Path("output") pour relatif au pwd
 
 # Création automatique du dossier final avec le timestamp
 timestamp = datetime.now().strftime("%Y%m%d_%H%M")
+timestamp2 = datetime.now().strftime("%Y%m%d")
 FINAL_OUTPUT_DIR = OUTPUT_BASE / f"MassBLASTer_output_{timestamp}"
 FINAL_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 # Fichier CSV global
-CSV_OUT = FINAL_OUTPUT_DIR / "massblaster_results.csv"
+CSV_OUT = FINAL_OUTPUT_DIR / f"massblaster_results_{timestamp}.csv"
 
 # ──────────────────────────────────────────────
 #  CSV
@@ -166,7 +170,7 @@ for json_file in json_files:
     reports = data["BlastOutput2"]
 
     clean_name = json_file.stem.replace("source_", "").replace(".fas", "")
-    html_out = FINAL_OUTPUT_DIR / f"{clean_name}.html"
+    html_out = FINAL_OUTPUT_DIR / f"{clean_name}_{timestamp}.html"
     html_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     example_title = reports[0]["report"]["results"]["search"]["query_title"]
@@ -187,9 +191,32 @@ th, td {{ border: 1px solid #aaa; padding: 6px 10px; white-space: nowrap; }}
 th {{ background: #002060; color: white; }}
 code {{ background: #f5f5f5; padding: 6px; display: block; white-space: pre; }}
 h3 {{ margin-left: 30px; }}
+
+/* Bouton flottant "Retour en haut" */
+.back-to-top {{
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #002060;
+  color: white;
+  padding: 10px 15px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: bold;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}}
+.back-to-top:hover {{
+  background: #003399;
+}}
+.query-separator {{
+  border: 0;
+  border-top: 3px solid #800000;  /* rouge foncé */
+  margin: 40px 0 20px 0;
+}}
 </style>
 </head>
 <body>
+<a id="top"></a>
 
 <h1>MassBLASTer Results — {escape(clean_name)}</h1>
 <p><strong>Sequenced on {seq_label}</strong></p>
@@ -237,6 +264,7 @@ h3 {{ margin-left: 30px; }}
         sid, _, _, scode = parse_sample_info(search["query_title"])
 
         html += f"""
+<hr class="query-separator">
 <h2 id="{escape(search['query_id'])}">{escape(search['query_id'])}</h2>
 <p><strong>Sequence ID :</strong> {escape(search['query_title'])}</p>
 <p><strong>Sample name :</strong> {escape(scode)}</p>
@@ -278,12 +306,16 @@ h3 {{ margin-left: 30px; }}
 
             html += "</table>"
 
-    html += "</body></html>"
+    html += """
+    <a href="#top" class="back-to-top">↑ Back to the top</a>
+    </body></html>
+    """
+
 
     with html_out.open("w") as f:
         f.write(html)
 
-    print(f"  ✔ HTML OK : {html_out.name}")
+    print(f"[OK]  ✔ HTML file generated : {html_out.name}")
 
 # CSV global
 with open(CSV_OUT, "w", newline="") as f:
@@ -291,5 +323,5 @@ with open(CSV_OUT, "w", newline="") as f:
     writer.writerow(csv_header)
     writer.writerows(csv_rows)
 
-print(f"\n[OK] ✔ CSV global généré : {CSV_OUT}")
-print(f"[OK] ✔ Tous les résultats sont dans : {FINAL_OUTPUT_DIR}\n")
+print(f"\n[OK] ✔ CSV file generated : {CSV_OUT}")
+print(f"[OK] ✔ All results are in : {FINAL_OUTPUT_DIR}\n")
