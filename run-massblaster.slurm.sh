@@ -48,7 +48,7 @@ cd "$BASE_DIR/massblaster_plutof_pub"
 apptainer exec massblaster.sif /run_massblaster.sh "$CLEAN_NAME" \
     -num_threads 8 \
     -dust no \
-    -db "/massblaster_plutof_rel/data/ITS_RefSeq_Fungi" \
+    -db "/massblaster_plutof_rel/data/plutof1" \
     -outfmt 15 \
     -reward 1 \
     -gapextend 2 \
