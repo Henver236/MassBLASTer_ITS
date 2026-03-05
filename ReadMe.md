@@ -1,8 +1,8 @@
 # MassBLATer pipeline #
 
 ## Disclaimer 
-This software is a custom adaptation of the TU‑NHM/massblaster_plutof_pub pipeline. By using it, you agree to comply with the original project's licensing terms as set forth by its creator, Kessy Abarenkov for the Biodiversity Informatics research group of Tartu Univeristy. 
-Here is the adresse of the original project : https://github.com/TU-NHM/massblaster_plutof_pub
+This software is a custom adaptation of the TU‑NHM/massblaster_plutof_pub pipeline. By using it, you agree to comply with the original project's licensing terms as set forth by its creator, Kessy Abarenkov for the Biodiversity Informatics research group of Tartu Univeristy. I dont't own any of code or ressources provided in the massblaster_plutof_pub submodule (https://github.com/Henver236/MassBLASTer_ITS/tree/main/massblaster_plutof_pub).  
+Here is the adresse of the original project : https://github.com/TU-NHM/massblaster_plutof_pub.  
 The author of this customized version provides the code “as‑is” and makes no warranties regarding its performance, accuracy, or suitability for any particular purpose. Consequently, the author cannot be held responsible for the quality, correctness, or any consequences arising from the results generated with this pipeline. Users assume all risk associated with its deployment and should verify outputs independently before relying on them.
 
 ## Introduction
@@ -139,6 +139,7 @@ Reward score for a matching base (+1 per correct match).
 ### `-gapextend 2`
 Cost to extend a gap = 2. 
 A long gap therefore costs more, but the opening penalty is zero (useful for ITS, which often has structural indels).
+
 ---
 
 ### `-max_target_seqs 1`
@@ -165,5 +166,40 @@ This is unusually long for classic BLASTN but it's align with MassBLASTER’s st
 ### `-gapopen 0`
 Gap opening cost = 0. 
 apparently it's atypical, but this makes sense for ITS sequences where insertions/deletions are very frequent.
+
+---
+
+## Files description
+
+### • `update-NCBI-ITS-db.sh`
+Usefull to update manually with the last UNITE database version and convert in extensions needed by BLAST. 
+
+### • `db-update+convert.sh`
+A script to update UNITE db with the last General FASTA release (manually downloaded). 
+
+### • `its-trim.py`
+Used to trim sequences before blast. 
+This script will cut every nuclotides before the fisrt "CAT" pattern.
+It use a "sliding window" algorithm to choose where to cut the end of each sequence.
+By default, the algorithm is set with a 50 nucleotide windows and a 5% treshold. 
+It means that if there is more than 5% of ambiguous nucleotide in the 50 nucleotide window, it will cut here and discard the end of the sequence. 
+
+### • `its-trim.sh`
+Just a test script to see if it's doable un shell bash instead of python.
+It's not recommanded to use this one. 
+
+### • `run-massblaster.sh`
+A wrapper to launch the pipeline localy. 
+
+### • `run-massblaster.slurm.sh`
+A wrapper to launch the pipeline on a computing node when working on a HPC cluster. 
+
+### • `format-output.py`
+A script that create a CSV file woth all the results and use it to create a HTML page.
+Then, this HTML page can be used to display and explore results, a little bit like a NCBI blastn results page.
+
+
+
+
 
 
