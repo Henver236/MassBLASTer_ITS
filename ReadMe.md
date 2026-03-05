@@ -1,54 +1,48 @@
 # MassBLATer pipeline #
 
+## Disclaimer 
+This software is a custom adaptation of the TU‑NHM/massblaster_plutof_pub pipeline. By using it, you agree to comply with the original project's licensing terms as set forth by its creator, Kessy Abarenkov for the Biodiversity Informatics research group of Tartu Univeristy. 
+Here is the adresse of the original project : https://github.com/TU-NHM/massblaster_plutof_pub
+The author of this customized version provides the code “as‑is” and makes no warranties regarding its performance, accuracy, or suitability for any particular purpose. Consequently, the author cannot be held responsible for the quality, correctness, or any consequences arising from the results generated with this pipeline. Users assume all risk associated with its deployment and should verify outputs independently before relying on them.
+
 ## Introduction
 
-Ce pipeline a été prévu pour lancer un blastn sur un grand nombre de séquences,  
-rassemblée dans un fichier FASTA (.fas),  
-en utilisant des bases de données ITS, comme UNITE ou INSD.  
+This pipeline is designed to run a blastn on a large number of sequences gathered in a FASTA file (.fas), using ITS databases such as UNITE or INSD.
 
-En sortie, on obtient une page HTML dynamique qui permet de visualiser les réultats,  
-ainsi qu'un fichier CSV (.csv).  
+The output consists of a dynamic HTML page that allows you to view the results, as well as a CSV file (.csv).
 
-Le pipeline retient les trois meilleurs "hits"
+The pipeline keeps the three best “hits”.
 
 ---
 
-## Entrées attendues
+## Expected Inputs
 
-Idéalement, le pipeline attend un fichier FASTA (.fas) avec une ligne commencent par `>`,  
-contenant le nom de la séquence et certaines infos,  
-et une ligne avec la séquence trimmée (sans les primers).
+Ideally, the pipeline expects a FASTA file (.fas) with a header line that starts with `>`, containing the sequence name and some additional information, followed by a line with the trimmed sequence (without primers).
 
-Le format de nom de séquence attendu est le suivant :
-
+The expected sequence‑name format is:
 ```text
 <SAMPLE_ID>_<YYMMDD>-<SAMPLE_CODE>[_<OPTIONAL_INFO>...]
 ````
 
-C'est à dire :
-Un identifiant de séquence; `_`; la date du séquençage; `-`; le code de l'échantillon; `_`; le primer uilisé (optionnel).
+În other words :
+Sequence ID; `_`; sequencing date; `-`; sample code; `_`; the primer used (optionnal).
 
 Exemple :
-
 ```fasta
 >TJU-6_251027-L7_ITS1F
 ```
-
-Il s'agit du format de séquence utilisé par le laboratoire Fasteris.
-Il est toute fois possible de nommer ses échantillons de façon libre,
-simplement en évitant le caractère `_`.
+This is the naming convention used by the Fasteris laboratory. However, it's possible to name samples freely as long as the `_` character is avoided.
 
 ---
 
 ## Usage
 
-1. uploader les données dans un fichiers `data`
-2. transférer le fichier à traiter dans
+1. Upload the data into a `data` folder.
+2. Transfer the file to be processed to 
    `~/unite-massblaster/massblaster_plutof_pub/indata`
-3. ajouter `source_` au début du nom du fichier
-   (ex: `source_MonFichierFasta.fas`)
-4. lancer le pipeline avec la commande :
-
+3. Prefix the file name with `source_` 
+   (e.g.: `source_MonFichierFasta.fas`)
+4. Launch the pipeline with the command:
 ```bash
 sbatch ~/unite-massblaster/launch-massblaster.slurm.sh
 ```
@@ -57,18 +51,17 @@ sbatch ~/unite-massblaster/launch-massblaster.slurm.sh
 
 ## SLURM
 
-Par défaut, le pipeline utilise SLURM.
+By default, the pipeline runs under SLURM.
+SLURM is used to optimise and schedule ressources usage on HPC cluster.
 
-Il est possible de modifier le comportement de SLURM ou de lancer la commande localement
-suprimant le snipet slurm au début du wrapper :
-
+It is possible to modify the SLURM behavior or run the command locally by editing or removing the SLURM snippet at the beginning of the wrapper:
 ```text
 ~/unite-massblaster/launch-massblaster-v3.slurm.sh
 ```
 
 ---
 
-## Description ligne par ligne du script de lancement de MassBLASTer
+## Line by line description of the MassBLASTer launch script
 
 ```bash
 ./massblaster.sif /run_massblaster.sh "$CLEAN_NAME" \
@@ -84,39 +77,39 @@ suprimant le snipet slurm au début du wrapper :
     -gapopen 0
 ```
 ---
+
 ### `./massblaster.sif /run_massblaster.sh "$CLEAN_NAME"`
 
-Lancement du container massblaster (apptainer ou singularity)
-lancement du script de blast sur le nom de fichier trasnmis pas `"$CLEAN_NAME"`
+The container massblaster.sif launches the blast script on the file name passed via `"$CLEAN_NAME"`
 
 ---
 
 ### `-num_threads 4`
 
-Le nombre de coeur CPU utiliser pour l'éxécution (ici 4)
+Number of CPU cores to use (here 4).
 
 ---
 
 ### `-dust no`
-
-Désactive le filtre de basses complexités sur les séquences.
-Normalement dust supprime des motifs très répétitifs — ici on le coupe, car les ITS peuvent contenir des répétitions importantes et on ne veut pas les perdre.
+Disables the low‑complexity filter. Normally, DUST removes highly repetitive motifs; it's turn off because ITS regions can contain important repeats that we don’t want to lose.
 
 ---
 
 ### `-db "/massblaster_plutof_rel/data/plutof_fungi_its"`
 
-Base de données contre laquelle on aligne les séquences :
-Ici → `plutof_fungi_its`
+Database against which the sequences are compare. 
+In this example it's  `plutof_fungi_its`
 
-Mais il y a d'autre option :
+Other database options are:
 ```bash
-plutof_fungi_its:     "UNITE (only fungi); rDNA ITS"
-plutof_nf_its:        "UNITE (non-fungi) / Other_euk_1; rDNA ITS"
-insd_its:             "INSD (only fungi); rDNA ITS"
-insd_nf_its:          "INSD (non-fungi); rDNA ITS / Other_euk_2"
-envir_plutof_its:     "UNITE environmental (all eukaryotes) / Envir; rDNA ITS"
-plutof_tri12:         "ToxGen; Tri12"
+Option               "Description"
+
+plutof_fungi_its:    "UNITE (only fungi); rDNA ITS"
+plutof_nf_its:       "UNITE (non-fungi) / Other_euk_1; rDNA ITS"
+insd_its:            "INSD (only fungi); rDNA ITS"
+insd_nf_its:         "INSD (non-fungi); rDNA ITS / Other_euk_2"
+envir_plutof_its:    "UNITE environmental (all eukaryotes) / Envir; rDNA ITS"
+plutof_tri12:        "ToxGen; Tri12"
 plutof1:             "UNITE+INSD"
 plutof2:             "UNITE+Envir"
 plutof3:             "UNITE+Other_euk"
@@ -129,62 +122,48 @@ plutof9:             "INSD+Envir+Other_euk"
 plutof10:            "UNITE+Envir+Other_euk"
 plutof11:            "UNITE+INSD+Envir+Other_euk"
 ```
-Remlacer la dernière partie du chemin par l'option choisie.
+Replace the last part of the path with the desired option.
 
 ---
 
 ### `-outfmt 15`
-
-Format de sortie → JSON (standard BLAST 15)
-C’est pour cela que les fichiers .txt contiennent en réalité du JSON.
+Output format → JSON (standard BLAST format 15). That’s why the .txt files actually contain JSON.
 
 ---
 
 ### `-reward 1`
-
-Score de récompense pour une base identique (= +1 point par match correct)
+Reward score for a matching base (+1 per correct match).
 
 ---
 
 ### `-gapextend 2`
-
-Coût d’extension d’un gap = 2
-Donc un gap long coûte cher (bien), mais on ne pénalise pas l'ouverture initiale (utile pour l’ITS qui a souvent des indels structuraux).
-
+Cost to extend a gap = 2. 
+A long gap therefore costs more, but the opening penalty is zero (useful for ITS, which often has structural indels).
 ---
 
 ### `-max_target_seqs 1`
-
-On garde seulement le meilleur hit.
-MassBlaster cherche juste la meilleure assignation possible.
-Voir si il est possible de jouer avec cette option pour sortir les 3 meilleures hits par exemple.
+Keep only the best hit. 
+MassBLASTER returns the single best assignment by default.
+I adjust this parameter to retrieve the top 3 hits, but you can keep more hits.
 
 ---
 
 ### `-penalty -2`
-
-Pénalité pour un mismatch (une base différente)(= -2 points)
-
-Donc le score d’alignement est basé sur :
-+1 pour un match
--2 pour une erreur
-
-Apparement, ce ratio favorise des alignements précis, adaptés à l’ITS.
+Penalty for a mismatch. 
+One different base = –2 points.
+Thus, the alignment score is calculated as +1 for a match, –2 for a mismatch. 
+This ratio favors precise alignments, which is suited with ITS data.
 
 ---
 
 ### `-word_size 28`
-
-Longueur de mot (« seed word ») = 28 bases
-
-Très long pour du BLASTN classique, mais cohérent avec la stratégie MassBlaster :
-On veut des alignements plus stricts, éviter le bruit, et ne retenir que les hits sérieux.
+Seed word length = 28 bases. 
+This is unusually long for classic BLASTN but it's align with MassBLASTER’s strategy: stricter matches, less noise, and only serious hits retained.
 
 ---
 
 ### `-gapopen 0`
+Gap opening cost = 0. 
+apparently it's atypical, but this makes sense for ITS sequences where insertions/deletions are very frequent.
 
-Coût d’ouverture d’un gap = 0
-
-Il semblerait que cela soit inhabituel mais cohérent pour des séquences ITS, où les insertions / délétions sont très fréquentes.
 
