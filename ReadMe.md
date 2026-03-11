@@ -60,8 +60,16 @@ It is possible to modify the SLURM behavior or run the command locally by editin
 ```
 
 ---
+## BLAST
 
-## Line by line description of the MassBLASTer launch script
+BLAST (Basic Local Alignment Search Tool) performs heuristic local sequence alignment: it first detects exact k-mer seeds ("words") and then extends them to produce High Scoring Pairs (HSPs). These alignments are scored according to matches, mismatches, and gap penalties.
+
+Authoritative documentation for these parameters is provided in the NCBI BLAST+ Command Line Applications User Manual :
+https://www.ncbi.nlm.nih.gov/books/NBK279690/
+https://conmeehan.github.io/blast+tutorial.html
+https://www.i.animalgenome.org/bioinfo/resources/manuals/blast2.2.24/user_manual.pdf
+
+### Line by line description of the MassBLASTer launch script
 
 ```bash
 ./massblaster.sif /run_massblaster.sh "$CLEAN_NAME" \
@@ -80,22 +88,41 @@ It is possible to modify the SLURM behavior or run the command locally by editin
 
 ### `./massblaster.sif /run_massblaster.sh "$CLEAN_NAME"`
 
-The container massblaster.sif launches the blast script on the file name passed via `"$CLEAN_NAME"`
+This command runs the Massblaster pipeline inside an Apptainer (Singularity) container (massblaster.sif).
+The script internally launches a BLAST+ nucleotide alignment (likely blastn or megablast) to compare query sequences ($CLEAN_NAME) against a local reference database (check -db section below).
 
 ---
 
 ### `-num_threads 4`
 
-Number of CPU cores to use (here 4).
+Number of CPU threads (logical cores) used to parallelize the BLAST search. (in this exemple: 4 threads).
+
+Possible values : Integer (tipically between 2 to 64, depends of hardware limitations)
 
 ---
 
-### `-dust no`
-Disables the low‑complexity filter. Normally, DUST removes highly repetitive motifs; it's turn off because ITS regions can contain important repeats that we don’t want to lose.
+### Sequence filtering
+`-dust no`  
+Controls (enable or disable) the DUST low-complexity filter.  
+  
+DUST detects low-complexity nucleotide regions such as:  
+• homopolymer runs (e.g., AAAAAA)  
+• microsatellite-like repeats  
+• low-information sequence composition  
+  
+In this exemple, it's turn off because ITS regions can contain repetitive motifs that may still be taxonomically informative.  
+
+This is also preferred when analyzing:  
+• short barcode markers  
+• other type of ITS regions (plants, eukaryote)  
+• metabarcoding amplicons  
+  
+Possible values: Boolean ("yes" / "no")
 
 ---
 
-### `-db "/massblaster_plutof_rel/data/plutof_fungi_its"`
+### Reference database
+`-db "/massblaster_plutof_rel/data/plutof_fungi_its"`
 
 Database against which the sequences are compare. 
 In this example it's  `plutof_fungi_its`
