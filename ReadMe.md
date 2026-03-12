@@ -1,8 +1,10 @@
-# MassBLATer pipeline #
+# MassBLATer ITS pipeline #
 
 ## Disclaimer 
-This software is a custom adaptation of the TU‑NHM/massblaster_plutof_pub pipeline. By using it, you agree to comply with the original project's licensing terms as set forth by its creator, Kessy Abarenkov for the Biodiversity Informatics research group of Tartu Univeristy. I dont't own any of code or ressources provided in the massblaster_plutof_pub submodule (https://github.com/Henver236/MassBLASTer_ITS/tree/main/massblaster_plutof_pub).  
-Here is the adresse of the original project : https://github.com/TU-NHM/massblaster_plutof_pub.  
+This software is a custom adaptation of the TU‑NHM/massblaster_plutof_pub pipeline. By using it, you agree to comply with the original project's licensing terms as set forth by its creator, Kessy Abarenkov for the Biodiversity Informatics research group of Tartu Univeristy. I dont't own any of code or ressources provided in the massblaster_plutof_pub submodule:  
+https://github.com/Henver236/MassBLASTer_ITS/tree/main/massblaster_plutof_pub  
+Here is the adresse of the original project:  
+https://github.com/TU-NHM/massblaster_plutof_pub   
 The author of this customized version provides the code “as‑is” and makes no warranties regarding its performance, accuracy, or suitability for any particular purpose. Consequently, the author cannot be held responsible for the quality, correctness, or any consequences arising from the results generated with this pipeline. Users assume all risk associated with its deployment and should verify outputs independently before relying on them.
 
 ## Introduction
@@ -41,7 +43,7 @@ This is the naming convention used by the Fasteris laboratory. However, it's pos
 2. Transfer the file to be processed to 
    `~/unite-massblaster/massblaster_plutof_pub/indata`
 3. Prefix the file name with `source_` 
-   (e.g.: `source_MonFichierFasta.fas`)
+   (e.g.: `source_My_Fasta_File.fas`)
 4. Launch the pipeline with the command:
 ```bash
 sbatch ~/unite-massblaster/launch-massblaster.slurm.sh
@@ -55,9 +57,19 @@ By default, the pipeline runs under SLURM.
 SLURM is used to optimise and schedule ressources usage on HPC cluster.
 
 It is possible to modify the SLURM behavior or run the command locally by editing or removing the SLURM snippet at the beginning of the wrapper:
-```text
+```bash
 ~/unite-massblaster/launch-massblaster-v3.slurm.sh
 ```
+SLURM snippet looks like this :  
+```bash
+#SBATCH --job-name=MassBLASTer         # Slurm job name.
+#SBATCH --output=slurm-logs/%x_%j.out  # A log output file is created with job name and date/time, and placed in /logs.
+#SBATCH --error=slurm-logs/%x_%j.err   # A log errors file is created with job name and date/time, and placed in /logs.
+#SBATCH --cpus-per-task=8              # Number of CPU cores used. 8 is enough for 20-30 query Megablast. 
+#SBATCH --mem=16G                      # Number of RAM GB used. 16 GB is enough for 20-30 query Megablast.
+#SBATCH --time=01:00:00                # Time allocated to the job. 1 hours is enough for a 20-30 query Megablast.
+```
+Adjuste computational parameters `-num_threads 4` accordingly (see below).
 
 ---
 ## BLAST
@@ -65,11 +77,13 @@ It is possible to modify the SLURM behavior or run the command locally by editin
 BLAST (Basic Local Alignment Search Tool) performs heuristic local sequence alignment: it first detects exact k-mer seeds ("words") and then extends them to produce High Scoring Pairs (HSPs). These alignments are scored according to matches, mismatches, and gap penalties.
 
 Authoritative documentation for these parameters is provided in the NCBI BLAST+ Command Line Applications User Manual :
-https://www.ncbi.nlm.nih.gov/books/NBK279690/
-https://conmeehan.github.io/blast+tutorial.html
-https://www.i.animalgenome.org/bioinfo/resources/manuals/blast2.2.24/user_manual.pdf
+https://www.ncbi.nlm.nih.gov/books/NBK279690/  
+There are other very usefull ressources to understand BLAST tools :  
+https://conmeehan.github.io/blast+tutorial.html  
+https://www.i.animalgenome.org/bioinfo/resources/manuals/blast2.2.24/user_manual.pdf  
+https://www.biob.in/2020/12/creating-custom-database-using.html  
 
-### Line by line description of the MassBLASTer launch script
+### Line by line description of the MassBLASTer launch command
 
 ```bash
 ./massblaster.sif /run_massblaster.sh "$CLEAN_NAME" \
@@ -86,22 +100,22 @@ https://www.i.animalgenome.org/bioinfo/resources/manuals/blast2.2.24/user_manual
 ```
 ---
 
-### `./massblaster.sif /run_massblaster.sh "$CLEAN_NAME"`
-
+###  Main command line
+`./massblaster.sif /run_massblaster.sh "$CLEAN_NAME"`  
 This command runs the Massblaster pipeline inside an Apptainer (Singularity) container (massblaster.sif).
 The script internally launches a BLAST+ nucleotide alignment (likely blastn or megablast) to compare query sequences ($CLEAN_NAME) against a local reference database (check -db section below).
 
 ---
-
-### `-num_threads 4`
+### Computational parameters  
+`-num_threads 4`  
 
 Number of CPU threads (logical cores) used to parallelize the BLAST search. (in this exemple: 4 threads).
 
-Possible values : Integer (tipically between 2 to 64, depends of hardware limitations)
+Possible values : Integer  
+Tipically between 2 to 64, depends of hardware limitations.
 
 ---
-
-### Sequence filtering
+### Sequence filtering  
 `-dust no`  
 Controls (enable or disable) the DUST low-complexity filter.  
   
@@ -120,14 +134,12 @@ This is also preferred when analyzing:
 Possible values: Boolean ("yes" / "no")
 
 ---
-
-### Reference database
-`-db "/massblaster_plutof_rel/data/plutof_fungi_its"`
+### Reference database `-db "/massblaster_plutof_rel/data/plutof_fungi_its"`
 
 Database against which the sequences are compare. 
 In this example it's  `plutof_fungi_its`
 
-Other database options are:
+Other database options are available :
 ```bash
 Option               "Description"
 
@@ -150,52 +162,113 @@ plutof10:            "UNITE+Envir+Other_euk"
 plutof11:            "UNITE+INSD+Envir+Other_euk"
 ```
 Replace the last part of the path with the desired option.
+It's alo possible to create a new database from FASTA file. For exemple, UNITE provide FASTA file database that can be convert to multiple files formats needed by BLAST, using the "makeblastdb" command from BLAST+ tool :  
+`makeblastdb -in /path/to/fasta/database.fasta -dbtype nucl -out path/to/output/files`  
+To download the latest version of UNITE database, go to the adresse belowe and check under "General FASTA release :  
+https://unite.ut.ee/repository.php  
+
+Plutof1, plutof2, etc... are alias files. You can create your own.  
+Or, instead, you can refer to a groupe of BLAST database files, simply by avoiding using the file format in the path :
+`-db "/massblaster_plutof_rel/data/custom_version_of_database"`  
+In this exemple, the command refere to all database files who start with a name like "custom_version_of_database", that's to say :  
+```text
+custom_version_of_database.ndb  
+custom_version_of_database.nhr  
+custom_version_of_database.nin  
+custom_version_of_database.njs  
+custom_version_of_database.not  
+custom_version_of_database.nsq  
+custom_version_of_database.ntf  
+custom_version_of_database.nto  
+```
+Possible values : String  
 
 ---
+### Output format `-outfmt 15`  
+Specifies the format of the BLAST output.
+Format 15 corresponds to single-file BLAST JSON output.  
+JSON file as output is not easy to read but it have advantages :  
+•	structured hierarchical format  
+•	easy parsing in pipelines  
+•	compatible with Python / R / workflow managers  
+So it's easier to use it for results visualisation and downstream analysis. 
 
-### `-outfmt 15`
-Output format → JSON (standard BLAST format 15). That’s why the .txt files actually contain JSON.
-
----
-
-### `-reward 1`
-Reward score for a matching base (+1 per correct match).
-
----
-
-### `-gapextend 2`
-Cost to extend a gap = 2. 
-A long gap therefore costs more, but the opening penalty is zero (useful for ITS, which often has structural indels).
-
----
-
-### `-max_target_seqs 1`
-Keep only the best hit. 
-MassBLASTER returns the single best assignment by default.
-I adjust this parameter to retrieve the top 3 hits, but you can keep more hits.
+Default :
+Output format is JSON (standard BLAST format 15). 
+However, for an unknown reason, output JSON file has a .txt extension. 
+Possible values : Integer  
 
 ---
+### Alignment scoring parameters  
+BLAST computes alignment scores using:  
+•	match rewards         `-reward 1`  
+•	mismatch penalties    `-penalty -2`  
+•	gap penalties         `-gapextend 2`  
+These parameters directly affect alignment sensitivity and specificity.  
 
-### `-penalty -2`
-Penalty for a mismatch. 
-One different base = –2 points.
+#### Match rewards  
+`-reward 1`  
+Reward score for a matching nucleotide pair.
+Default :  
++1 per correct match.  
+Possible values : Integer  
+
+#### Mismatch penalties  
+`-penalty -2`  
+Penalty assigned to a mismatch.  
+Default :  
+One different base = –2 points.  
 Thus, the alignment score is calculated as +1 for a match, –2 for a mismatch. 
-This ratio favors precise alignments, which is suited with ITS data.
+This ratio favors precise alignments, which is suited with ITS data.  
 
 ---
 
-### `-word_size 28`
+### Gap penalties  
+
+#### Opening gap penalties  
+`-gapopen 0`  
+Cost for opening a gap in the alignment.
+
+Default :  
+Gap opening cost = 0.  
+This means there is no penalty for initiating a gap, which can increase alignment flexibility.  
+Apparently it's atypical, but this makes sense in megablast-like configuration, especially for ITS sequences where insertions/deletions are very frequent.  
+Possible values : Integer  
+
+#### Extending gap penalties  
+`-gapextend 2`  
+Cost for extending an existing gap.  
+Higher values discourage long gaps.  
+Default :  
+Cost to extend a gap = 2.  
+A long gap therefore costs more, but the opening penalty is zero (useful for ITS, which often has structural indels).
+Possible values : Integer  
+
+---
+
+### Hits limit number  
+`-max_target_seqs 1`  
+Maximum number of target sequences (hits) reported for each query.  
+Default:  
+Keep only the best hit. 
+MassBLASTER returns only the best single assignment.  
+It's possible (recommanded) to customise this option to retrieve 3, 10, or more hits by query.
+Possible values : Integer  
+
+---
+### Seed size  
+`-word_size 28`  
+Size of the initial exact match seed used by BLAST.  
+Default:  
 Seed word length = 28 bases. 
-This is unusually long for classic BLASTN but it's align with MassBLASTER’s strategy: stricter matches, less noise, and only serious hits retained.
+This is unusually long for classic BLASTN but it's align with MassBLASTER’s strategy: stricter matches, less noise, and only serious hits retained.  
+If I understand correctly, BLAST's algorithm starts by searching for a perfect match of 28 consecutive nucleotides between the query and sequences in the database. And only then does the algorithm begin to process the similarity of the entire sequence, or sorting best hits.  
+
+Possible values : Integer  
+Smaller = higher sensitivity  
+Larger = faster but less sensitive  
 
 ---
-
-### `-gapopen 0`
-Gap opening cost = 0. 
-apparently it's atypical, but this makes sense for ITS sequences where insertions/deletions are very frequent.
-
----
-
 ## Files description
 
 ### • `update-NCBI-ITS-db.sh`
@@ -225,7 +298,16 @@ A wrapper to launch the pipeline on a computing node when working on a HPC clust
 A script that create a CSV file woth all the results and use it to create a HTML page.
 Then, this HTML page can be used to display and explore results, a little bit like a NCBI blastn results page.
 
-
+---
+## References  
+1.	NCBI BLAST+ Command Line Applications User Manual  
+https://www.ncbi.nlm.nih.gov/books/NBK279690/ (i.animalgenome.org)
+2.	BLAST output formats and JSON format (outfmt)  
+https://www.biob.in/2020/12/creating-custom-database-using.html (biob.in)
+3.	BLAST report formatting and use of max_target_seqs  
+https://www.ncbi.nlm.nih.gov/sites/books/NBK279684/ (ncbi.nlm.nih.gov)
+4.	Altschul et al. 1990 – Basic Local Alignment Search Tool  
+https://doi.org/10.1016/S0022-2836(05)80360-2  
 
 
 
