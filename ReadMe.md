@@ -301,11 +301,11 @@ Then, this HTML page can be used to display and explore results, a little bit li
 ---
 ## References  
 1.	NCBI BLAST+ Command Line Applications User Manual  
-https://www.ncbi.nlm.nih.gov/books/NBK279690/ (i.animalgenome.org)
+https://www.ncbi.nlm.nih.gov/books/NBK279690/ (i.animalgenome.org)  
 2.	BLAST output formats and JSON format (outfmt)  
-https://www.biob.in/2020/12/creating-custom-database-using.html (biob.in)
+https://www.biob.in/2020/12/creating-custom-database-using.html (biob.in)  
 3.	BLAST report formatting and use of max_target_seqs  
-https://www.ncbi.nlm.nih.gov/sites/books/NBK279684/ (ncbi.nlm.nih.gov)
+https://www.ncbi.nlm.nih.gov/sites/books/NBK279684/ (ncbi.nlm.nih.gov)  
 4. UNITE community  
 https://unite.ut.ee/  
 5. Massblaster PLUTOF GitHub repository  
