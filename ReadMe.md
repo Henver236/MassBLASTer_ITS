@@ -245,7 +245,6 @@ A long gap therefore costs more, but the opening penalty is zero (useful for ITS
 Possible values : Integer  
 
 ---
-
 ### Hits limit number  
 `-max_target_seqs 1`  
 Maximum number of target sequences (hits) reported for each query.  
@@ -260,9 +259,10 @@ Possible values : Integer
 `-word_size 28`  
 Size of the initial exact match seed used by BLAST.  
 Default:  
-Seed word length = 28 bases. 
+Seed word length = 28 bases.  
 This is unusually long for classic BLASTN but it's align with MassBLASTER’s strategy: stricter matches, less noise, and only serious hits retained.  
 If I understand correctly, BLAST's algorithm starts by searching for a perfect match of 28 consecutive nucleotides between the query and sequences in the database. And only then does the algorithm begin to process the similarity of the entire sequence, or sorting best hits.  
+
 
 Possible values : Integer  
 Smaller = higher sensitivity  
@@ -271,30 +271,30 @@ Larger = faster but less sensitive
 ---
 ## Files description
 
-### • `update-NCBI-ITS-db.sh`
+#### • `update-NCBI-ITS-db.sh`
 Usefull to update manually with the last UNITE database version and convert in extensions needed by BLAST. 
 
-### • `db-update+convert.sh`
+#### • `db-update+convert.sh`
 A script to update UNITE db with the last General FASTA release (manually downloaded). 
 
-### • `its-trim.py`
+#### • `its-trim.py`
 Used to trim sequences before blast. 
 This script will cut every nuclotides before the fisrt "CAT" pattern.
 It use a "sliding window" algorithm to choose where to cut the end of each sequence.
 By default, the algorithm is set with a 50 nucleotide windows and a 5% treshold. 
 It means that if there is more than 5% of ambiguous nucleotide in the 50 nucleotide window, it will cut here and discard the end of the sequence. 
 
-### • `its-trim.sh`
+#### • `its-trim.sh`
 Just a test script to see if it's doable un shell bash instead of python.
 It's not recommanded to use this one. 
 
-### • `run-massblaster.sh`
+#### • `run-massblaster.sh`
 A wrapper to launch the pipeline localy. 
 
-### • `run-massblaster.slurm.sh`
+#### • `run-massblaster.slurm.sh`
 A wrapper to launch the pipeline on a computing node when working on a HPC cluster. 
 
-### • `format-output.py`
+#### • `format-output.py`
 A script that create a CSV file woth all the results and use it to create a HTML page.
 Then, this HTML page can be used to display and explore results, a little bit like a NCBI blastn results page.
 
@@ -306,7 +306,11 @@ https://www.ncbi.nlm.nih.gov/books/NBK279690/ (i.animalgenome.org)
 https://www.biob.in/2020/12/creating-custom-database-using.html (biob.in)
 3.	BLAST report formatting and use of max_target_seqs  
 https://www.ncbi.nlm.nih.gov/sites/books/NBK279684/ (ncbi.nlm.nih.gov)
-4.	Altschul et al. 1990 – Basic Local Alignment Search Tool  
+4. UNITE community  
+https://unite.ut.ee/  
+5. Massblaster PLUTOF GitHub repository  
+https://github.com/TU-NHM/massblaster_plutof_pub.git  
+6.	Altschul et al. 1990 – Basic Local Alignment Search Tool  
 https://doi.org/10.1016/S0022-2836(05)80360-2  
 
 
