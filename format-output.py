@@ -13,12 +13,12 @@ from datetime import datetime
 # ──────────────────────────────────────────────
 
 # Obtenir le répertoire où le script Python est situé
-BASE_DIR = Path(__file__).parent  # Cela renverra le répertoire du script Python
+BASE_DIR = Path(__file__).parent  # Répertoire du script Python
 
 # Input : où se trouvent le fichier JSON créé par blastn
 INPUT_DIR = BASE_DIR / "massblaster_plutof_pub/outdata"
-# Output : dossier où sont créer le CSV et HTML
-OUTPUT_BASE = BASE_DIR / "output" # Alternative : Path("output") pour relatif au pwd
+# Output : dossier où sont créés le CSV et HTML
+OUTPUT_BASE = BASE_DIR / "output"
 
 # Création automatique du dossier final avec le timestamp
 timestamp = datetime.now().strftime("%Y%m%d_%H%M")
@@ -70,8 +70,11 @@ print(f"Trouvé {len(json_files)} fichiers JSON-like dans {INPUT_DIR}")
 def parse_sample_info(query_title):
     """
     Parsing permissif du query_title.
+    Extrait :
+    - sample_id : première partie
+    - date (si YYMMDD dans la 2e partie)
+    - sample_code : code après un "-"
     """
-
     sample_id = "unknown"
     date_raw = None
     date_iso = "unknown"
@@ -79,8 +82,9 @@ def parse_sample_info(query_title):
 
     if not query_title:
         return sample_id, date_raw, date_iso, sample_code
-
-    parts = query_title.split("_")
+    
+    # Split sur "_" OU espaces (un ou plusieurs)
+    parts = re.split(r"[_\s]+", query_title.strip())
 
     # Sample ID
     sample_id = parts[0]
@@ -112,6 +116,12 @@ def parse_sample_info(query_title):
 
 
 def colorize_alignment(q, m, h):
+    """
+    Coloration HTML de l'alignement :
+    - vert : match exact
+    - gris : gap
+    - rouge : mismatch
+    """
     cq, cm, ch = "", "", ""
     for qc, mc, hc in zip(q, m, h):
         if mc == "|":
@@ -128,6 +138,10 @@ def colorize_alignment(q, m, h):
 
 
 def make_blast_style_alignment(hsp):
+    """
+    Génère un bloc HTML formaté façon BLAST classique,
+    avec positions Query/Sbjct et couleurs sur l'alignement.
+    """
     qseq = hsp["qseq"]
     mseq = hsp["midline"]
     hseq = hsp["hseq"]
@@ -151,6 +165,7 @@ def make_blast_style_alignment(hsp):
             f"Sbjct {str(h_pos).ljust(4)} {ch}<br><br>"
         )
 
+        # On avance les positions en excluant les gaps
         q_pos += len(q_block.replace("-", ""))
         h_pos += len(h_block.replace("-", ""))
 
@@ -178,6 +193,8 @@ for json_file in json_files:
 
     seq_label = seq_date_iso if seq_date_iso != "unknown" else "unknown date"
 
+    # En-tête HTML + CSS
+    # Ajout de styles pour la pagination
     html = f"""<!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -213,6 +230,25 @@ h3 {{ margin-left: 30px; }}
   border-top: 3px solid #800000;  /* rouge foncé */
   margin: 40px 0 20px 0;
 }}
+
+/* Conteneur de chaque bloc de query (pour pagination) */
+.query-block {{
+  margin-bottom: 40px;
+}}
+
+/* Zone des contrôles de pagination */
+.pagination {{
+  margin: 20px 0;
+}}
+.pagination button {{
+  margin-right: 5px;
+  padding: 5px 10px;
+}}
+.pagination button.active {{
+  font-weight: bold;
+  background: #002060;
+  color: white;
+}}
 </style>
 </head>
 <body>
@@ -230,7 +266,7 @@ h3 {{ margin-left: 30px; }}
 </tr>
 """
 
-    # INDEX
+    # ───── INDEX (tableau des queries) ─────
     for rep in reports:
         search = rep["report"]["results"]["search"]
         sid, _, _, scode = parse_sample_info(search["query_title"])
@@ -238,13 +274,17 @@ h3 {{ margin-left: 30px; }}
         hits = search["hits"][:3]
         cells = ""
 
+        # Bloc "hit" dans l'index.
         for h in hits:
             desc = h["description"][0]
             hsp = h["hsps"][0]
-            sci_name = desc["title"].split("|")[-1].replace("_", " ")
+            parts_name = desc["title"].split("|")
+            # sci_name = concat de certains éléments, en retirant "_" et "|"
+            sci_name = "|".join([parts_name[i] for i in (0, 2, 3)]).replace("_", " ").replace("|", " ")
             pct = 100 * hsp["identity"] / hsp["align_len"]
             cells += f"<td><i>{escape(sci_name)}</i><br>{pct:.1f}%</td>"
 
+        # Compléter si < 3 hits
         cells += "<td></td>" * (3 - len(hits))
 
         html += f"""
@@ -258,12 +298,15 @@ h3 {{ margin-left: 30px; }}
 
     html += "</table>"
 
-    # DÉTAILS
+    # ───── DÉTAILS (section paginée) ─────
+    # Chaque query détaillée est dans un <div class="query-block"> pour la pagination JS.
     for rep in reports:
         search = rep["report"]["results"]["search"]
         sid, _, _, scode = parse_sample_info(search["query_title"])
 
+        # OUVERTURE du bloc de query (important pour la pagination)
         html += f"""
+<div class="query-block">
 <hr class="query-separator">
 <h2 id="{escape(search['query_id'])}">{escape(search['query_id'])}</h2>
 <p><strong>Sequence ID :</strong> {escape(search['query_title'])}</p>
@@ -306,12 +349,91 @@ h3 {{ margin-left: 30px; }}
 
             html += "</table>"
 
+        # FERMETURE du bloc de query (pour .query-block)
+        html += "</div>"
+
+    # ───── Liens haut de page + pagination + script JS ─────
+    # Le script :
+    # - récupère tous les .query-block
+    # - affiche 50 blocs par page
+    # - génère des boutons Précédent / pages / Suivant
     html += """
-    <a href="#top" class="back-to-top">↑ Back to the top</a>
-    </body></html>
-    """
+<a href="#top" class="back-to-top">↑ Back to the top</a>
 
+<div class="pagination" id="pagination-controls"></div>
 
+<script>
+// Nombre d'items (queries) par page
+const ITEMS_PER_PAGE = 50;
+
+// Récupère tous les blocs de requêtes détaillées
+const queryBlocks = Array.from(document.querySelectorAll('.query-block'));
+const totalItems = queryBlocks.length;
+const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+let currentPage = 1;
+
+// Affiche les blocs de la page donnée et masque les autres
+function showPage(page) {
+  currentPage = page;
+  const start = (page - 1) * ITEMS_PER_PAGE;
+  const end = start + ITEMS_PER_PAGE;
+
+  queryBlocks.forEach((el, idx) => {
+    if (idx >= start && idx < end) {
+      el.style.display = '';
+    } else {
+      el.style.display = 'none';
+    }
+  });
+
+  updatePaginationControls();
+  // Remonte en haut pour éviter de rester perdu au milieu des résultats
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Met à jour les boutons de pagination
+function updatePaginationControls() {
+  const container = document.getElementById('pagination-controls');
+  container.innerHTML = '';
+
+  if (totalPages <= 1) {
+    return; // Pas besoin de pagination s'il n'y a qu'une page
+  }
+
+  // Bouton Précédent
+  const prevBtn = document.createElement('button');
+  prevBtn.textContent = 'Précédent';
+  prevBtn.disabled = currentPage === 1;
+  prevBtn.onclick = () => showPage(currentPage - 1);
+  container.appendChild(prevBtn);
+
+  // Boutons numérotés pour chaque page
+  for (let p = 1; p <= totalPages; p++) {
+    const btn = document.createElement('button');
+    btn.textContent = p;
+    if (p === currentPage) {
+      btn.classList.add('active');
+    }
+    btn.onclick = () => showPage(p);
+    container.appendChild(btn);
+  }
+
+  // Bouton Suivant
+  const nextBtn = document.createElement('button');
+  nextBtn.textContent = 'Suivant';
+  nextBtn.disabled = currentPage === totalPages;
+  nextBtn.onclick = () => showPage(currentPage + 1);
+  container.appendChild(nextBtn);
+}
+
+// Initialisation : afficher la première page
+showPage(1);
+</script>
+
+</body></html>
+"""
+
+    # Écriture du HTML final
     with html_out.open("w") as f:
         f.write(html)
 
@@ -323,5 +445,5 @@ with open(CSV_OUT, "w", newline="") as f:
     writer.writerow(csv_header)
     writer.writerows(csv_rows)
 
-print(f"\n[OK] ✔ CSV file generated : {CSV_OUT}")
-print(f"[OK] ✔ All results are in : {FINAL_OUTPUT_DIR}\n")
+print(f"\n[OK]  ✔ CSV file generated : {CSV_OUT}")
+print(f"[OK]  ✔ All results are in : {FINAL_OUTPUT_DIR}\n")

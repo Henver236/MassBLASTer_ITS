@@ -8,7 +8,7 @@
 # Optional :
 #module load python
 
-# In HPC environnment, the only way to install something is in conda :
+# OPTIONAL: In HPC environnment, the only way to install something is in conda :
 goconda
 # Environnment creation :
 conda create -n blast-env
