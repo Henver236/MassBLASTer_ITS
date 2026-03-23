@@ -296,7 +296,21 @@ A wrapper to launch the pipeline on a computing node when working on a HPC clust
 
 #### • `format-output.py`
 A script that create a CSV file woth all the results and use it to create a HTML page.
-Then, this HTML page can be used to display and explore results, a little bit like a NCBI blastn results page.
+Then, this HTML page can be used to display and explore results, a little bit like a NCBI blastn results page.  
+
+---
+
+## Considerations about UNITE database  
+
+### Reps and Refs sequences  
+In the UNITE database, the core difference between RefS (Reference Sequences) and RepS (Representative Sequences) lies in curation. 
+RepS are automatically chosen from the most common sequence in a Species Hypothesis (SH), while RefS are explicitly selected or confirmed by experts for high quality. 
+All species hypotheses (SH) in the UNITE database have a representative sequence (RepS), but only a subset have a manually designated reference sequence (RefS).  
+If both exist, the RefS is considered higher quality and takes precedence over the RepS.  
+  
+More informations available here :  
+https://unite.ut.ee/repository.php#:~:text=Following%20K%C3%B5ljalg%20et%20al.,of%20the%20taxon%20at%20hand  
+
 
 ---
 ## References  
