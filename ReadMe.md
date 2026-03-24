@@ -284,15 +284,16 @@ It use a "sliding window" algorithm to choose where to cut the end of each seque
 By default, the algorithm is set with a 50 nucleotide windows and a 5% treshold. 
 It means that if there is more than 5% of ambiguous nucleotide in the 50 nucleotide window, it will cut here and discard the end of the sequence. 
 
-#### • `its-trim.sh`
-Just a test script to see if it's doable un shell bash instead of python.
-It's not recommanded to use this one. 
+#### • `load-scale-launcher.sh`  
+This is the main wrapper.  
+It will enumerate the numbre of nucleotide in the whole FASTA input file and automatically set ressources needs for BLAST, via SLURM.
 
 #### • `run-massblaster.sh`
-A wrapper to launch the pipeline localy. 
+This script is launched by load-scale-launcher.sh.  
+It will launch BLAST and give the output (a JSON file with a .txt extension) to format-output.py.
 
 #### • `run-massblaster.slurm.sh`
-A wrapper to launch the pipeline on a computing node when working on a HPC cluster. 
+A wrapper to launch the pipeline with custom on a computing node when working on a HPC cluster. 
 
 #### • `format-output.py`
 A script that create a CSV file woth all the results and use it to create a HTML page.
