@@ -14,5 +14,7 @@ ssh-github.pub
 update-NCBI-ITS-db_short.sh
 trim_fasta.sh
 format-output-old.py
+its-trim-old.py
+its-trim-old.sh
 
 WID-MassBLASTer_ITS.sh

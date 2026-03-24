@@ -21,10 +21,6 @@ if [ ${#FILES[@]} -eq 0 ]; then
     exit 1
 fi
 
-# Check bases paires number and put it in FILES
-#TOTAL_BP=$(awk '!/^>/ {sum += length($0)} END {print sum}' "$FILES")
-#TOTAL_BP=$(awk '!/^>/ {sum += length($0)} END {print sum}' "${FILES[@]}")
-#TOTAL_BP=$(awk '!/^>/ {sum += length($0)} END {print sum+0}' "${FILES[@]}")
 
 for FILE in "${FILES[@]}"; do
     # Check bases paires number and put it in FILES
