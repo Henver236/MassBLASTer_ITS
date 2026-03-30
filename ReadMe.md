@@ -46,7 +46,7 @@ This is the naming convention used by the Fasteris laboratory. However, it's pos
    (e.g.: `source_My_Fasta_File.fas`)
 4. Launch the pipeline with the command:
 ```bash
-sbatch ~/unite-massblaster/launch-massblaster.slurm.sh
+bash ~/unite-massblaster/load-scale-launcher.sh
 ```
 
 ---
@@ -83,7 +83,7 @@ https://conmeehan.github.io/blast+tutorial.html
 https://www.i.animalgenome.org/bioinfo/resources/manuals/blast2.2.24/user_manual.pdf  
 https://www.biob.in/2020/12/creating-custom-database-using.html  
 
-### Line by line description of the MassBLASTer launch command
+### Line by line description of MassBLASTer launch command
 
 ```bash
 ./massblaster.sif /run_massblaster.sh "$CLEAN_NAME" \
@@ -134,7 +134,8 @@ This is also preferred when analyzing:
 Possible values: Boolean ("yes" / "no")
 
 ---
-### Reference database `-db "/massblaster_plutof_rel/data/plutof_fungi_its"`
+### Reference database  
+`-db "/massblaster_plutof_rel/data/plutof_fungi_its"`  
 
 Database against which the sequences are compare. 
 In this example it's  `plutof_fungi_its`
@@ -184,7 +185,8 @@ custom_version_of_database.nto
 Possible values : String  
 
 ---
-### Output format `-outfmt 15`  
+### Output format  
+`-outfmt 15`  
 Specifies the format of the BLAST output.
 Format 15 corresponds to single-file BLAST JSON output.  
 JSON file as output is not easy to read but it have advantages :  
@@ -201,9 +203,9 @@ Possible values : Integer
 ---
 ### Alignment scoring parameters  
 BLAST computes alignment scores using:  
-•	match rewards         `-reward 1`  
-•	mismatch penalties    `-penalty -2`  
-•	gap penalties         `-gapextend 2`  
+•	match rewards        = `-reward 1`  
+•	mismatch penalties   = `-penalty -2`  
+•	gap penalties        = `-gapextend 2`  
 These parameters directly affect alignment sensitivity and specificity.  
 
 #### Match rewards  
@@ -271,31 +273,31 @@ Larger = faster but less sensitive
 ---
 ## Files description
 
-#### • `update-NCBI-ITS-db.sh`
+#### ► update-NCBI-ITS-db.sh  
 Usefull to update manually with the last UNITE database version and convert in extensions needed by BLAST. 
 
-#### • `db-update+convert.sh`
+#### ► db-update+convert.sh  
 A script to update UNITE db with the last General FASTA release (manually downloaded). 
 
-#### • `its-trim.py`
+#### ► its-trim.py  
 Used to trim sequences before blast. 
 This script will cut every nuclotides before the fisrt "CAT" pattern.
 It use a "sliding window" algorithm to choose where to cut the end of each sequence.
 By default, the algorithm is set with a 50 nucleotide windows and a 5% treshold. 
 It means that if there is more than 5% of ambiguous nucleotide in the 50 nucleotide window, it will cut here and discard the end of the sequence. 
 
-#### • `load-scale-launcher.sh`  
+#### ► load-scale-launcher.sh  
 This is the main wrapper.  
 It will enumerate the numbre of nucleotide in the whole FASTA input file and automatically set ressources needs for BLAST, via SLURM.
 
-#### • `run-massblaster.sh`
+#### ► run-massblaster.sh  
 This script is launched by load-scale-launcher.sh.  
 It will launch BLAST and give the output (a JSON file with a .txt extension) to format-output.py.
 
-#### • `run-massblaster.slurm.sh`
+#### ► run-massblaster.slurm.sh  
 A wrapper to launch the pipeline with custom on a computing node when working on a HPC cluster. 
 
-#### • `format-output.py`
+#### ► format-output.py  
 A script that create a CSV file woth all the results and use it to create a HTML page.
 Then, this HTML page can be used to display and explore results, a little bit like a NCBI blastn results page.  
 
