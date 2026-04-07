@@ -9,15 +9,15 @@ The author of this customized version provides the code “as‑is” and makes 
 
 ## Introduction
 
-This pipeline is designed to run a blastn on a large number of sequences gathered in a FASTA file (.fas), using ITS databases such as UNITE or INSD.
+This pipeline is designed to run BLASTn on a large number of sequences gathered in a FASTA file (.fas), using ITS databases such as UNITE or INSD.
 
 The output consists of a dynamic HTML page that allows you to view the results, as well as a CSV file (.csv).
 
-The pipeline keeps the three best “hits”.
+The pipeline keeps the three best hits.
 
 ---
 
-## Expected Inputs
+## Expected Inputs & parsing
 
 Ideally, the pipeline expects a FASTA file (.fas) with a header line that starts with `>`, containing the sequence name and some additional information, followed by a line with the trimmed sequence (without primers).
 
@@ -31,7 +31,7 @@ Sequence ID; `_`; sequencing date; `-`; sample code; `_`; the primer used (optio
 
 Exemple :
 ```fasta
->TJU-6_251027-L7_ITS1F
+>NTW-6_251027-L7_ITS1F
 ```
 This is the naming convention used by the Fasteris laboratory. However, it's possible to name samples freely as long as the `_` character is avoided.
 
