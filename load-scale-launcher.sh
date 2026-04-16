@@ -48,7 +48,7 @@ for FILE in "${FILES[@]}"; do
     fi
 
     # to avoid over-threading
-    MIN_BP_PER_CORE=1000
+    MIN_BP_PER_CORE=500
     MAX_CORES_BY_SIZE=$(( TOTAL_BP / MIN_BP_PER_CORE ))
     MAX_CORES_BY_SIZE=$(( MAX_CORES_BY_SIZE < 1 ? 1 : MAX_CORES_BY_SIZE ))
 

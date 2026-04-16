@@ -2,6 +2,7 @@
 
 # running the script - ./run_massblaster.sh <run_id>
 
+# Check if there is an argument send with the script calling (E.g: ./run_massblaster.sh "My_Input_File.fas" )
 if [ -z "$1" ]
     then
         echo "No run_id argument supplied!"
@@ -16,6 +17,7 @@ pwd=$(pwd)
 
 # parse command line arguments (example: -num_threads 4 -dust no -db data/plutof_fungi -query ../infiles/source_5131 -outfmt 15
 #  -reward 1 -gapextend 2 -max_target_seqs 1 -penalty -2 -word_size 28 -gapopen 0)
+# Command line arguments are stored in "mb_args" variable.
 options=$@
 arguments=($options)
 index=0

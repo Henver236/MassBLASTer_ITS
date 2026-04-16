@@ -54,7 +54,7 @@ apptainer exec massblaster.sif /run_massblaster.sh "$CLEAN_NAME" \
     -word_size 28 \
     -gapopen 0
 
-python "$BASE_DIR/format-output.py"
+python3 "$BASE_DIR/format-output.py"
 
 ## Coping & Cleaning folders...
 cd ..
