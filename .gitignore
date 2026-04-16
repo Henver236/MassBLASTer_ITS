@@ -3,7 +3,7 @@ output/*
 db/*
 data/*
 massblaster_plutof_pub/*
-output-demo/*
+output-demo/
 output-demo/MassBLASTer_output_demo/*
 
 launch-massblaster.slurm.sh
